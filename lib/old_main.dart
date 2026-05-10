@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'draggable_game.dart';
+import 'game.dart';
 
 void main() {
   runApp(const MainApp());
@@ -52,16 +52,17 @@ class _GamePageState extends State<GamePage> {
           child: Column(
             spacing: 5.0,
             children: [
+              for (final guess in _game.guesses)
                 Row(
                   spacing: 5.0,
                   children: [
-              for (final person in _game.availablePeople)
+                    for (final record in guess)
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 2.5,
                           vertical: 2.5,
                         ),
-                        child: Tile(person.name, person.type),
+                        child: Tile(record.char, record.type),
                       ),
                   ],
                 ),
@@ -83,12 +84,10 @@ class _GamePageState extends State<GamePage> {
 }
 
 class Tile extends StatefulWidget {
-  const Tile(this.name, this.guessType, {super.key})
-    : imageUrl = 'assets/pngs/$name.png';
+  const Tile(this.letter, this.hitType, {super.key});
 
-  final String name;
-  final GuessType guessType;
-  final String imageUrl;
+  final String letter;
+  final HitType hitType;
 
   @override
   State<Tile> createState() => _TileState();
@@ -102,14 +101,15 @@ class _TileState extends State<Tile> {
       height: 60,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
-        color: switch (widget.guessType) {
-          GuessType.hit => Colors.green,
-          GuessType.miss => Colors.red,
+        color: switch (widget.hitType) {
+          HitType.hit => Colors.green,
+          HitType.partial => Colors.yellow,
+          HitType.miss => Colors.grey,
           _ => Colors.white,
         },
       ),
       child: Center(
-        child: Image(image: AssetImage(widget.imageUrl)),
+        child: const Image(image: AssetImage('assets/pngs/tamagotchi.png')),
       ),
     );
   }

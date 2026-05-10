@@ -32,6 +32,13 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/windows/
+/web/
+/linux/
+/ios/
+/android/
+/macos/
+/assets/riskaware/*
 
 # Symbolication related
 app.*.symbols
