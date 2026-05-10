@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
         appBar: AppBar(
           title: Align(
             alignment: Alignment.center,
-            child: Text('Riskaware years!'),
+            child: Text('Arrange everyone in order of their Riskaware age (oldest to youngest)'),
           ),
         ),
         body: Center(child: GamePage()),
@@ -50,7 +50,7 @@ class _GamePageState extends State<GamePage> {
     return Expanded(
       child: Center(
         child: SizedBox(
-          width: 1000,
+          width: 1100,
           child: Column(
             spacing: 5.0,
             children: [
@@ -183,7 +183,7 @@ class Tile extends StatelessWidget {
     return Opacity(
       opacity: opacity,
       child: Container(
-        width: 190,
+        width: 200,
         height: 250,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade300),
@@ -223,7 +223,7 @@ class TileSlot extends StatelessWidget {
         final isHovering = candidateData.isNotEmpty;
 
         return Container(
-          width: 190,
+          width: 200,
           height: 250,
 
           decoration: BoxDecoration(
@@ -259,12 +259,14 @@ class GuessButton extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.arrow_circle_up),
+          child: TextButton(
+            style: const ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll<Color>(Colors.amber),
+  ),
             onPressed: () {
               _onSubmit();
             },
+            child: Text("Submit"),
           ),
         ),
       ],
@@ -287,12 +289,14 @@ class ResetButton extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.camera_outdoor),
+          child: TextButton(
+            style: const ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll<Color>(Colors.greenAccent),
+  ),
             onPressed: () {
               _onReset();
             },
+            child: Text("Reset game"),
           ),
         ),
       ],
