@@ -81,7 +81,7 @@ final Map<String, DateTime> peopleNames = {
   'james_w': DateTime.parse("2023-01-09"),
   'owain_s': DateTime.parse("2023-10-02"),
   'una_r': DateTime.parse("2025-01-06"),
-  'murray_p': DateTime.parse("2025-02-01")
+  'murray_p': DateTime.parse("2025-02-01"),
 };
 
 final sorted = peopleNames.entries.toList()
@@ -243,17 +243,25 @@ class PeopleGroup with IterableMixin<Person> {
   factory PeopleGroup.random() {
     final random = Random();
     List<Person> nextPeopleGroup = List<Person>.filled(5, emptyPerson);
-    var i =0;
+    var i = 0;
     while (i < 5) {
       var randomPerson = _namesToPeople[random.nextInt(_namesToPeople.length)];
-      if (!nextPeopleGroup.map((p) => p.name).toList().contains(randomPerson.name)) {
-        nextPeopleGroup[i] = Person(name: randomPerson.name, position: randomPerson.position, startDate: randomPerson.startDate, type: GuessType.none);
-        print("name: " + randomPerson.name + " position ${randomPerson.position} and start date: " + randomPerson.startDate.toString());
+      if (!nextPeopleGroup
+          .map((p) => p.name)
+          .toList()
+          .contains(randomPerson.name)) {
+        nextPeopleGroup[i] = Person(
+          name: randomPerson.name,
+          position: randomPerson.position,
+          startDate: randomPerson.startDate,
+          type: GuessType.none,
+        );
+        print(
+          "name: ${randomPerson.name} position ${randomPerson.position} and start date: ${randomPerson.startDate}",
+        );
         i++;
       }
     }
-
-
 
     var sortedList = List<Person>.from(nextPeopleGroup);
     sortedList.sort((a, b) => a.position.compareTo(b.position));
@@ -261,7 +269,9 @@ class PeopleGroup with IterableMixin<Person> {
       for (Person person in nextPeopleGroup) {
         if (person.name == sortedList[i].name) {
           person.position = i;
-        print("repositioned name: " + person.name + " position ${person.position} and start date: " + person.startDate.toString());
+          print(
+            "repositioned name: ${person.name} position ${person.position} and start date: ${person.startDate}",
+          );
         }
       }
     }
@@ -330,7 +340,9 @@ extension PeopleGroupUtils on PeopleGroup {
         }
       }
 
-      print("name: " + currentPerson.name + "guess position $guessPosition and hidden position $hiddenPosition");
+      print(
+        "name: ${currentPerson.name}guess position $guessPosition and hidden position $hiddenPosition",
+      );
 
       if (guessPosition == hiddenPosition) {
         result[i] = Person(
