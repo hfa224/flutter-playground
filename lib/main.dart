@@ -16,13 +16,7 @@ class MainApp extends StatelessWidget {
           title: Align(
             alignment: Alignment.center,
             child: Text(
-              'Riskaware years!',
-              style: TextStyle(
-                fontFamily: 'Bonbon',
-                fontWeight: FontWeight.normal,
-                fontStyle: FontStyle.normal,
-                fontSize: 40.0,
-              ),
+              'Riskaware years!'
             ),
           ),
         ),
@@ -39,16 +33,27 @@ class GamePage extends StatefulWidget {
   State<GamePage> createState() => _GamePageState();
 }
 
+
+typedef TileData = ({String name, GuessType type});
+
 class _GamePageState extends State<GamePage> {
   // This object is part of the game.dart file.
   final Game _game = Game();
+  List<TileData?> board = List<TileData?>.filled(5, null);
+  List<TileData>? result;
+
+  void moveTile(TileData tile, int position) {
+  setState(() {
+    board[position] = tile;
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Center(
         child: SizedBox(
-          width: 360,
+          width: 1000,
           child: Column(
             spacing: 5.0,
             children: [
@@ -65,15 +70,63 @@ class _GamePageState extends State<GamePage> {
                       ),
                   ],
                 ),
-              GuessInput(
-                onSubmitGuess: (guess) {
-                  setState(() {
-                    // NEW
-                    print(guess);
-                    _game.guess(guess);
-                  });
-                },
-              ),
+                if (result !=null)
+                  Row(
+                    spacing: 5.0,
+                    children: [
+                      for (var i=0; i< result!.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2.5,
+                              vertical: 2.5,
+                            ),
+                            child: TileSlot(position: i, tileData: result![i], onTileDropped: (TileData tileData, int position) {
+                                print(tileData.name);
+                                //moveTile(tileData, position);
+                            }),
+                          ),
+                    ],
+                  ),
+                if (result ==null)
+                  Row(
+                    spacing: 5.0,
+                    children: [
+                      for (var i=0; i< board.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2.5,
+                              vertical: 2.5,
+                            ),
+                            child: TileSlot(position: i, tileData: board[i], onTileDropped: (TileData tileData, int position) {
+                                print(tileData.name);
+                                moveTile(tileData, position);
+                            }),
+                          ),
+                    ],
+                  ),
+                  if (result ==null)
+                    GuessButton(
+                      onSubmitGuess: () {
+                        setState(() {
+                          // NEW
+                          List<Person> guessList = [];
+                          for (var i=0; i<board.length; i++) {
+                            guessList.add(Person(name: board[i]!.name, position: i, startDate: DateTime.now(), type: GuessType.none));
+                          }
+                          result = _game.guess(guessList).map((person) => (name: person.name, type: person.type)).toList();
+                        });
+                      },
+                    ),
+                  if (result !=null)
+                    ResetButton(
+                      onReset: () {
+                        setState(() {
+                          _game.resetGame();
+                          result = null;
+                          board = List<TileData?>.filled(5, null);
+                        });
+                      },
+                    ),
             ],
           ),
         ),
@@ -82,84 +135,157 @@ class _GamePageState extends State<GamePage> {
   }
 }
 
-class Tile extends StatefulWidget {
+class Tile extends StatelessWidget {
   const Tile(this.name, this.guessType, {super.key})
-    : imageUrl = 'assets/pngs/$name.png';
+    : imageUrl = 'assets/riskaware/$name.jpg';
 
   final String name;
   final GuessType guessType;
   final String imageUrl;
 
   @override
-  State<Tile> createState() => _TileState();
-}
-
-class _TileState extends State<Tile> {
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        color: switch (widget.guessType) {
-          GuessType.hit => Colors.green,
-          GuessType.miss => Colors.red,
-          _ => Colors.white,
-        },
+    return Draggable<TileData>(
+      data: (name: name, type: guessType),
+
+      // Widget shown while dragging
+      feedback: Material(
+        color: Colors.transparent,
+        child: _buildTile(opacity: 0.8),
       ),
-      child: Center(
-        child: Image(image: AssetImage(widget.imageUrl)),
+
+      // Widget shown in original spot while dragging
+      childWhenDragging: _buildTile(opacity: 0.3),
+
+      // Normal widget
+      child: _buildTile(),
+    );
+  }
+
+  Widget _buildTile({double opacity = 1.0}) {
+    return Opacity(
+      opacity: opacity,
+      child: Container(
+        width: 190,
+        height: 250,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          color: switch (guessType) {
+            GuessType.hit => Colors.green,
+            GuessType.miss => Colors.red,
+            _ => Colors.white,
+          },
+        ),
+        child: Center(
+          child: Image.asset(imageUrl),
+        ),
       ),
     );
   }
 }
 
-class GuessInput extends StatelessWidget {
-  GuessInput({super.key, required this.onSubmitGuess});
+class TileSlot extends StatelessWidget {
+  const TileSlot({
+    super.key,
+    required this.position,
+    required this.tileData,
+    required this.onTileDropped,
+  });
 
-  final void Function(String) onSubmitGuess;
+  final int position;
+  final TileData? tileData;
 
-  final TextEditingController _textEditingController = TextEditingController();
+  final void Function(TileData tile, int newPosition)
+  onTileDropped;
 
-  final FocusNode _focusNode = FocusNode();
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<TileData>(
+      onAcceptWithDetails: (details) {
+        onTileDropped(details.data, position);
+      },
+
+      builder: (context, candidateData, rejectedData) {
+        final isHovering = candidateData.isNotEmpty;
+
+        return Container(
+        width: 190,
+        height: 250,
+
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isHovering
+                  ? Colors.blue
+                  : Colors.grey.shade400,
+              width: 2,
+            ),
+
+            color: isHovering
+                ? Colors.blue.shade100
+                : Colors.grey.shade200,
+          ),
+
+          child: tileData != null ? Tile(tileData!.name, tileData!.type) : const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+}
+
+class GuessButton extends StatelessWidget {
+  const GuessButton({super.key, required this.onSubmitGuess});
+
+  final void Function() onSubmitGuess;
 
   void _onSubmit() {
-    onSubmitGuess(_textEditingController.text.trim());
-    _textEditingController.clear();
-    _focusNode.requestFocus();
+    onSubmitGuess();
   }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Padding(
+        
+          Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              maxLength: 5,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(35)),
-                ),
-              ),
-              controller: _textEditingController,
-              autofocus: true,
-              focusNode: _focusNode,
-              onSubmitted: (_) {
-                _onSubmit();
-              },
-            ),
-          ),
-        ),
-        IconButton(
+            child: IconButton(
           padding: EdgeInsets.zero,
           icon: const Icon(Icons.arrow_circle_up),
           onPressed: () {
             _onSubmit();
           },
         ),
+          ),
+        
+      ],
+    );
+  }
+}
+
+class ResetButton extends StatelessWidget {
+  const ResetButton({super.key, required this.onReset});
+
+  final void Function() onReset;
+
+  void _onReset() {
+    onReset();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.camera_outdoor),
+          onPressed: () {
+            _onReset();
+          },
+        ),
+          ),
+        
       ],
     );
   }

@@ -55,33 +55,33 @@ Person get emptyPerson => Person(
 
 /// Additional words accepted as guesses beyond those in [legalWords].
 final Map<String, DateTime> peopleNames = {
+  'rob_g': DateTime.parse("1984-04-02"),
+  'martyn_b': DateTime.parse("1984-04-02"),
+  'russ_m': DateTime.parse("2001-10-29"),
+  'tim_d': DateTime.parse("2004-04-19"),
+  'james_e': DateTime.parse("2005-10-03"),
+  'phil_w': DateTime.parse("2007-05-29"),
+  'sacha_d': DateTime.parse("2009-01-12"),
+  'peter_m': DateTime.parse("2011-04-04"),
+  'mark_w': DateTime.parse("2011-06-13"),
+  'helen_a': DateTime.parse("2013-09-16"),
+  'steve_b': DateTime.parse("2013-10-01"),
   'andrej_z': DateTime.parse("2015-11-30"),
+  'karin_e': DateTime.parse("2015-01-26"),
+  'tim_c': DateTime.parse("2015-10-01"),
+  'sian_j': DateTime.parse("2016-01-06"),
+  'beth_d': DateTime.parse("2018-03-07"),
+  'jenny_b': DateTime.parse("2019-11-11"),
   'ben_b': DateTime.parse("2019-11-18"),
   'fred_c': DateTime.parse("2021-10-04"),
-  'helen_a': DateTime.parse("2013-09-16"),
-  'james_e': DateTime.parse("2005-10-03"),
-  'jenny_b': DateTime.parse("2019-11-11"),
-  'karin_e': DateTime.parse("2015-01-26"),
-  'mark_w': DateTime.parse("2011-06-13"),
-  'martyn_b': DateTime.parse("1984-04-02"),
-  'murray_p': DateTime.parse("2025-02-01"),
-  'tim_p': DateTime.parse("2022-02-01"),
-  'peter_m': DateTime.parse("2011-04-04"),
-  'phil_w': DateTime.parse("2007-05-29"),
-  'beth_d': DateTime.parse("2018-03-07"),
-  'agata_s': DateTime.parse("2022-11-01"),
-  'emily_t': DateTime.parse("2022-06-06"),
-  'james_w': DateTime.parse("2023-01-09"),
   'harry_h': DateTime.parse("2022-01-05"),
-  'rob_g': DateTime.parse("1984-04-02"),
-  'russ_m': DateTime.parse("2001-10-29"),
-  'sacha_d': DateTime.parse("2009-01-12"),
-  'sian_j': DateTime.parse("2016-01-06"),
-  'steve_b': DateTime.parse("2013-10-01"),
-  'tim_c': DateTime.parse("2015-10-01"),
-  'tim_d': DateTime.parse("2004-04-19"),
+  'tim_p': DateTime.parse("2022-02-01"),
+  'emily_t': DateTime.parse("2022-06-06"),
+  'agata_s': DateTime.parse("2022-11-01"),
+  'james_w': DateTime.parse("2023-01-09"),
   'owain_s': DateTime.parse("2023-10-02"),
   'una_r': DateTime.parse("2025-01-06"),
+  'murray_p': DateTime.parse("2025-02-01")
 };
 
 final sorted = peopleNames.entries.toList()
@@ -89,8 +89,6 @@ final sorted = peopleNames.entries.toList()
 final Map<String, DateTime> dateSortedPeople = {
   for (var entry in sorted) entry.key: entry.value,
 };
-
-//print(dateSortedPeople);
 
 List<Person> _namesToPeople = List.generate(
   dateSortedPeople.length,
@@ -248,17 +246,22 @@ class PeopleGroup with IterableMixin<Person> {
     var i =0;
     while (i < 5) {
       var randomPerson = _namesToPeople[random.nextInt(_namesToPeople.length)];
-      if (!nextPeopleGroup.contains(randomPerson)) {
-        nextPeopleGroup[i] = randomPerson;
+      if (!nextPeopleGroup.map((p) => p.name).toList().contains(randomPerson.name)) {
+        nextPeopleGroup[i] = Person(name: randomPerson.name, position: randomPerson.position, startDate: randomPerson.startDate, type: GuessType.none);
+        print("name: " + randomPerson.name + " position ${randomPerson.position} and start date: " + randomPerson.startDate.toString());
         i++;
       }
     }
+
+
+
     var sortedList = List<Person>.from(nextPeopleGroup);
     sortedList.sort((a, b) => a.position.compareTo(b.position));
     for (int i = 0; i < 5; i++) {
       for (Person person in nextPeopleGroup) {
         if (person.name == sortedList[i].name) {
           person.position = i;
+        print("repositioned name: " + person.name + " position ${person.position} and start date: " + person.startDate.toString());
         }
       }
     }
@@ -326,6 +329,8 @@ extension PeopleGroupUtils on PeopleGroup {
           hiddenPosition = person.position;
         }
       }
+
+      print("name: " + currentPerson.name + "guess position $guessPosition and hidden position $hiddenPosition");
 
       if (guessPosition == hiddenPosition) {
         result[i] = Person(
